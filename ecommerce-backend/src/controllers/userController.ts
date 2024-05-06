@@ -10,9 +10,21 @@ export const createUser = TryCatch(
     res: Response,
     next: NextFunction
   ) => {
-    throw new Error("Some error occurred");
+
     const { name, email, dob, photo, gender, _id } = req.body;
-    console.log(name, email, dob, photo, gender, _id);
+
+    let user = await User.findById(_id);
+
+    if(user) {
+        return res.status(200).json({
+            status: "success",
+            message: "User created successfully",
+        });
+    }
+
+    if (!_id || !name || !email || !photo || !gender || !dob)
+        return next(new ErrorHandler(400, "Please add all fields"));
+
 
     await User.create({
       name,
@@ -29,3 +41,44 @@ export const createUser = TryCatch(
     });
   }
 );
+
+export const getAllUsers = TryCatch(
+  async (
+    req: Request<{}, {}, NewUserRequestBody>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const users = await User.find();
+
+    res.status(201).json({
+      status: "success",
+      users,
+    });
+  }
+);
+
+export const getUser = TryCatch(async (req, res, next) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
+  
+    if (!user) return next(new ErrorHandler(400, "Invalid Id"));
+  
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  });
+  
+  export const deleteUser = TryCatch(async (req, res, next) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
+  
+    if (!user) return next(new ErrorHandler(400, "Invalid Id"));
+  
+    await user.deleteOne();
+  
+    return res.status(200).json({
+      success: true,
+      message: "User Deleted Successfully",
+    });
+  });

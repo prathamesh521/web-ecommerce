@@ -13,3 +13,5 @@ export interface NewUserRequestBody {
     res: Response,
     next: NextFunction
   ) => Promise<void | Response<any, Record<string, any>>>;
+
+  
